@@ -43,7 +43,7 @@ public class SlayvisualScreen extends Screen {
 
                 this.children.clear();
                 this.buttons.clear();
-                this.selectables.clear();
+                this.selectables().clear();
                 this.addButton(new TabButton(left + 14, top + 16, Category.VISUALS));
                 this.addButton(new TabButton(left + 114, top + 16, Category.COMBAT));
 
@@ -70,7 +70,7 @@ public class SlayvisualScreen extends Screen {
                 for (ClickableWidget widget : this.dynamicWidgets) {
                         this.children.remove(widget);
                         this.buttons.remove(widget);
-                        this.selectables.remove(widget);
+                        this.selectables().remove(widget);
                 }
                 this.dynamicWidgets.clear();
 
