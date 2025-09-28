@@ -2,8 +2,8 @@
 	"schemaVersion": 1,
 	"id": "slayvisual",
 	"version": "${version}",
-        "name": "SlayVisual",
-        "description": "Adds a configurable trigger bot with in-game GUI controls.",
+	"name": "slayvisual",
+	"description": "This is an example description! Tell everyone what your mod is about!",
 	"authors": [
 		"Me!"
 	],
@@ -14,14 +14,11 @@
 	"license": "CC0-1.0",
 	"icon": "assets/slayvisual/icon.png",
 	"environment": "*",
-        "entrypoints": {
-                "main": [
-                        "com.slayvisual.Slayvisual"
-                ],
-                "client": [
-                        "com.slayvisual.client.SlayvisualClient"
-                ]
-        },
+	"entrypoints": {
+		"main": [
+			"com.slayvisual.Slayvisual"
+		]
+	},
 	"mixins": [
 		"slayvisual.mixins.json"
 	],
