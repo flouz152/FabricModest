@@ -9,6 +9,7 @@ import net.minecraft.client.util.InputUtil;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.EntityHitResult;
 import org.lwjgl.glfw.GLFW;
@@ -18,6 +19,8 @@ public final class TriggerBot {
 
         private static KeyBinding toggleKey;
         private static boolean enabled;
+        private static long lastAttackTick = -1L;
+        private static int lastTargetEntityId = -1;
 
         private TriggerBot() {
         }
@@ -73,29 +76,68 @@ public final class TriggerBot {
                         return;
                 }
 
-                if (player.isOnGround()) {
-                        player.jump();
-                        return;
-                }
-
                 if (!isCriticalState(player)) {
                         return;
                 }
 
-                resetSprint(client, player);
+                long currentTick = client.world.getTime();
+                if (currentTick == lastAttackTick && targetEntity.getId() == lastTargetEntityId) {
+                        return;
+                }
+
+                SprintState sprintState = temporarilyResetSprint(client, player);
 
                 client.interactionManager.attackEntity(player, targetEntity);
                 player.swingHand(Hand.MAIN_HAND);
+
+                restoreSprint(client, player, sprintState);
+
+                lastAttackTick = currentTick;
+                lastTargetEntityId = targetEntity.getId();
         }
 
-        private static void resetSprint(MinecraftClient client, ClientPlayerEntity player) {
-                if (player.isSprinting()) {
-                        player.setSprinting(false);
+        private static SprintState temporarilyResetSprint(MinecraftClient client, ClientPlayerEntity player) {
+                KeyBinding sprintKey = client.options.keySprint;
+                boolean wasSprinting = player.isSprinting();
+                boolean keyWasPressed = sprintKey != null && sprintKey.isPressed();
+
+                if (!wasSprinting && !keyWasPressed) {
+                        return SprintState.NONE;
                 }
 
-                KeyBinding sprintKey = client.options.keySprint;
-                if (sprintKey != null) {
+                if (wasSprinting) {
+                        player.setSprinting(false);
+                        sendSprintPacket(player, ClientCommandC2SPacket.Mode.STOP_SPRINTING);
+                }
+
+                if (keyWasPressed) {
                         sprintKey.setPressed(false);
+                }
+
+                return new SprintState(wasSprinting, keyWasPressed);
+        }
+
+        private static void restoreSprint(MinecraftClient client, ClientPlayerEntity player, SprintState sprintState) {
+                if (!sprintState.shouldRestoreSprint && !sprintState.shouldRestoreKey) {
+                        return;
+                }
+
+                if (sprintState.shouldRestoreSprint) {
+                        player.setSprinting(true);
+                        sendSprintPacket(player, ClientCommandC2SPacket.Mode.START_SPRINTING);
+                }
+
+                if (sprintState.shouldRestoreKey) {
+                        KeyBinding sprintKey = client.options.keySprint;
+                        if (sprintKey != null) {
+                                sprintKey.setPressed(true);
+                        }
+                }
+        }
+
+        private static void sendSprintPacket(ClientPlayerEntity player, ClientCommandC2SPacket.Mode mode) {
+                if (player.networkHandler != null) {
+                        player.networkHandler.sendPacket(new ClientCommandC2SPacket(player, mode));
                 }
         }
 
@@ -117,5 +159,17 @@ public final class TriggerBot {
                 }
 
                 return player.getVelocity().y < 0.0d;
+        }
+
+        private static final class SprintState {
+                private static final SprintState NONE = new SprintState(false, false);
+
+                private final boolean shouldRestoreSprint;
+                private final boolean shouldRestoreKey;
+
+                private SprintState(boolean shouldRestoreSprint, boolean shouldRestoreKey) {
+                        this.shouldRestoreSprint = shouldRestoreSprint;
+                        this.shouldRestoreKey = shouldRestoreKey;
+                }
         }
 }
