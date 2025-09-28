@@ -15,3 +15,5 @@ Run the following command from the project root to build the mod JAR:
 ```
 
 The compiled JAR will be located in `build/libs`.
+
+> **Note for Windows users:** run `gradlew.bat build` if you are using the Command Prompt or PowerShell. Running the plain `gradle` command outside the project directory will result in the "Directory ... does not contain a Gradle build" error.
