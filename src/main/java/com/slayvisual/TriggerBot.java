@@ -81,7 +81,7 @@ public final class TriggerBot {
                 }
 
                 long currentTick = client.world.getTime();
-                if (currentTick == lastAttackTick && targetEntity.getId() == lastTargetEntityId) {
+                if (currentTick == lastAttackTick && targetEntity.getEntityId() == lastTargetEntityId) {
                         return;
                 }
 
@@ -93,7 +93,7 @@ public final class TriggerBot {
                 restoreSprint(client, player, sprintState);
 
                 lastAttackTick = currentTick;
-                lastTargetEntityId = targetEntity.getId();
+                lastTargetEntityId = targetEntity.getEntityId();
         }
 
         private static SprintState temporarilyResetSprint(MinecraftClient client, ClientPlayerEntity player) {
