@@ -5,8 +5,8 @@ import com.slayvisual.TriggerBot;
 import com.slayvisual.config.SlayvisualConfig;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.widget.AbstractButtonWidget;
 import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.gui.widget.SliderWidget;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.LiteralText;
@@ -26,7 +26,7 @@ public class SlayvisualScreen extends Screen {
         private static final int PANEL_HEIGHT = 220;
 
         private Category category = Category.VISUALS;
-        private final List<ClickableWidget> dynamicWidgets = new ArrayList<>();
+        private final List<AbstractButtonWidget> dynamicWidgets = new ArrayList<>();
         private boolean capturingTriggerKey;
 
         public SlayvisualScreen() {
@@ -41,9 +41,11 @@ public class SlayvisualScreen extends Screen {
                 int left = (this.width - PANEL_WIDTH) / 2;
                 int top = (this.height - PANEL_HEIGHT) / 2;
 
-                this.children().clear();
-                this.addDrawableChild(new TabButton(left + 14, top + 16, Category.VISUALS));
-                this.addDrawableChild(new TabButton(left + 114, top + 16, Category.COMBAT));
+                this.children.clear();
+                this.buttons.clear();
+                this.selectables.clear();
+                this.addButton(new TabButton(left + 14, top + 16, Category.VISUALS));
+                this.addButton(new TabButton(left + 114, top + 16, Category.COMBAT));
 
                 rebuildCategory(left, top + 60);
         }
@@ -57,7 +59,7 @@ public class SlayvisualScreen extends Screen {
         @Override
         public void tick() {
                 super.tick();
-                for (ClickableWidget widget : this.dynamicWidgets) {
+                for (AbstractButtonWidget widget : this.dynamicWidgets) {
                         if (widget instanceof AnimatedWidgetHolder) {
                                 ((AnimatedWidgetHolder) widget).tickAnimation();
                         }
@@ -65,8 +67,10 @@ public class SlayvisualScreen extends Screen {
         }
 
         private void rebuildCategory(int left, int contentTop) {
-                for (ClickableWidget widget : this.dynamicWidgets) {
-                        this.remove(widget);
+                for (AbstractButtonWidget widget : this.dynamicWidgets) {
+                        this.children.remove(widget);
+                        this.buttons.remove(widget);
+                        this.selectables.remove(widget);
                 }
                 this.dynamicWidgets.clear();
 
@@ -131,7 +135,7 @@ public class SlayvisualScreen extends Screen {
                 y += 28;
                 addDynamic(new ValueSlider(left + 20, y, 280, "Interval", 40f, 140f,
                                 () -> (float) SlayvisualConfig.COMBAT.getMinimumAttackIntervalMs(),
-                                value -> SlayvisualConfig.COMBAT.setMinimumAttackIntervalMs((long) value)));
+                                value -> SlayvisualConfig.COMBAT.setMinimumAttackIntervalMs((long) value.floatValue())));
                 y += 30;
 
                 addDynamic(new AnimatedWidget(left + 20, y, 280, 20, new LiteralText("Bind Trigger Bot")) {
@@ -156,9 +160,9 @@ public class SlayvisualScreen extends Screen {
                 });
         }
 
-        private void addDynamic(ClickableWidget widget) {
+        private void addDynamic(AbstractButtonWidget widget) {
                 this.dynamicWidgets.add(widget);
-                this.addDrawableChild(widget);
+                this.addButton(widget);
         }
 
         @Override
@@ -198,7 +202,7 @@ public class SlayvisualScreen extends Screen {
                 SlayvisualConfig.HitColor hit = SlayvisualConfig.VISUAL.getHitColor();
                 int previewColor = ((hit.getAlpha() & 0xFF) << 24) | ((hit.getRed() & 0xFF) << 16) | ((hit.getGreen() & 0xFF) << 8) | (hit.getBlue() & 0xFF);
                 fill(matrices, left + PANEL_WIDTH - 50, top + PANEL_HEIGHT - 30, left + PANEL_WIDTH - 20, top + PANEL_HEIGHT - 10, previewColor);
-                drawString(matrices, this.textRenderer, "Hit", left + PANEL_WIDTH - 48, top + PANEL_HEIGHT - 40, 0xFFFFFF);
+                this.textRenderer.drawWithShadow(matrices, "Hit", left + PANEL_WIDTH - 48, top + PANEL_HEIGHT - 40, 0xFFFFFF);
         }
 
         private final class TabButton extends AnimatedWidget {
@@ -432,16 +436,17 @@ public class SlayvisualScreen extends Screen {
 
                 protected abstract void handlePress();
 
-                protected static int mixColors(int first, int second, float progress) {
-                        int a = (int) (((first >> 24) & 0xFF) * progress + ((second >> 24) & 0xFF) * (1 - progress));
-                        int r = (int) (((first >> 16) & 0xFF) * progress + ((second >> 16) & 0xFF) * (1 - progress));
-                        int g = (int) (((first >> 8) & 0xFF) * progress + ((second >> 8) & 0xFF) * (1 - progress));
-                        int b = (int) ((first & 0xFF) * progress + (second & 0xFF) * (1 - progress));
-                        return (a << 24) | (r << 16) | (g << 8) | b;
-                }
         }
 
         private interface AnimatedWidgetHolder {
                 void tickAnimation();
+        }
+
+        private static int mixColors(int first, int second, float progress) {
+                int a = (int) (((first >> 24) & 0xFF) * progress + ((second >> 24) & 0xFF) * (1 - progress));
+                int r = (int) (((first >> 16) & 0xFF) * progress + ((second >> 16) & 0xFF) * (1 - progress));
+                int g = (int) (((first >> 8) & 0xFF) * progress + ((second >> 8) & 0xFF) * (1 - progress));
+                int b = (int) ((first & 0xFF) * progress + (second & 0xFF) * (1 - progress));
+                return (a << 24) | (r << 16) | (g << 8) | b;
         }
 }

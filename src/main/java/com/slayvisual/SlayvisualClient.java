@@ -47,9 +47,9 @@ public class SlayvisualClient implements ClientModInitializer {
 
                 Screen current = client.currentScreen;
                 if (current instanceof SlayvisualScreen) {
-                        client.setScreen(null);
+                        client.openScreen(null);
                 } else {
-                        client.setScreen(new SlayvisualScreen());
+                        client.openScreen(new SlayvisualScreen());
                 }
         }
 }
