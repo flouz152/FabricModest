@@ -7,7 +7,6 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.ClickableWidget;
-import net.minecraft.client.gui.widget.CyclingButtonWidget;
 import net.minecraft.client.gui.widget.SliderWidget;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.LiteralText;
@@ -19,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class SlayvisualScreen extends Screen {
@@ -104,11 +104,11 @@ public class SlayvisualScreen extends Screen {
                                 SlayvisualConfig.VISUAL::setViewModelScale));
                 y += 28;
 
-                addDynamic(CyclingButtonWidget.builder(value -> new LiteralText(value.getDisplayName()))
-                                .values(SlayvisualConfig.SwordAnimation.values())
-                                .initially(SlayvisualConfig.VISUAL.getSwordAnimation())
-                                .omitKeyText()
-                                .build(left + 20, y, 280, 20, new LiteralText("Sword Animation"), (button, value) -> SlayvisualConfig.VISUAL.setSwordAnimation(value)));
+                addDynamic(new EnumCycleButton<>(left + 20, y, 280, "Sword Animation",
+                                SlayvisualConfig.SwordAnimation.values(),
+                                SlayvisualConfig.VISUAL::getSwordAnimation,
+                                SlayvisualConfig.VISUAL::setSwordAnimation,
+                                SlayvisualConfig.SwordAnimation::getDisplayName));
                 y += 28;
 
                 addDynamic(new ColorSlider(left + 20, y, "Hit Color R", () -> SlayvisualConfig.VISUAL.getHitColor().getRed(), value -> SlayvisualConfig.VISUAL.getHitColor().setRed(value)));
@@ -253,6 +253,49 @@ public class SlayvisualScreen extends Screen {
                 @Override
                 protected boolean isActive() {
                         return getter.get();
+                }
+        }
+
+        private final class EnumCycleButton<T extends Enum<T>> extends AnimatedWidget {
+                private final T[] values;
+                private final Supplier<T> getter;
+                private final Consumer<T> setter;
+                private final Function<T, String> formatter;
+                private final String label;
+
+                private EnumCycleButton(int x, int y, int width, String label, T[] values, Supplier<T> getter,
+                                Consumer<T> setter, Function<T, String> formatter) {
+                        super(x, y, width, 20, LiteralText.EMPTY);
+                        this.label = label;
+                        this.values = values;
+                        this.getter = getter;
+                        this.setter = setter;
+                        this.formatter = formatter;
+                }
+
+                @Override
+                protected void handlePress() {
+                        T current = getter.get();
+                        int index = 0;
+                        for (int i = 0; i < values.length; i++) {
+                                if (values[i] == current) {
+                                        index = i;
+                                        break;
+                                }
+                        }
+                        setter.accept(values[(index + 1) % values.length]);
+                }
+
+                @Override
+                protected void renderContent(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+                        String text = label + ": " + formatter.apply(getter.get());
+                        drawCenteredText(matrices, textRenderer, new LiteralText(text), this.x + this.width / 2, this.y + 6,
+                                        0xFFFFFF);
+                }
+
+                @Override
+                protected boolean isActive() {
+                        return true;
                 }
         }
 

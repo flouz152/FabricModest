@@ -10,7 +10,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.SwordItem;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vector3f;
+import net.minecraft.util.math.Vec3f;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -53,24 +53,24 @@ public abstract class HeldItemRendererMixin {
                 switch (animation) {
                         case CELESTIAL:
                                 matrices.translate(0.0f, -0.05f * sine, 0.0f);
-                                matrices.multiply(Vector3f.POSITIVE_Y.getDegreesQuaternion(8.0f * sine));
+                                matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(8.0f * sine));
                                 break;
                         case CASCADE:
-                                matrices.multiply(Vector3f.POSITIVE_X.getDegreesQuaternion(-18.0f * sine));
-                                matrices.multiply(Vector3f.POSITIVE_Z.getDegreesQuaternion(12.0f * sine));
+                                matrices.multiply(Vec3f.POSITIVE_X.getDegreesQuaternion(-18.0f * sine));
+                                matrices.multiply(Vec3f.POSITIVE_Z.getDegreesQuaternion(12.0f * sine));
                                 break;
                         case NOVA:
                                 matrices.translate(0.02f * sine, 0.0f, 0.02f * sine);
-                                matrices.multiply(Vector3f.POSITIVE_Y.getDegreesQuaternion(-16.0f * sine));
+                                matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(-16.0f * sine));
                                 break;
                         case VORTEX:
-                                matrices.multiply(Vector3f.POSITIVE_Y.getDegreesQuaternion(24.0f * sine));
-                                matrices.multiply(Vector3f.POSITIVE_X.getDegreesQuaternion(6.0f * sine));
+                                matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(24.0f * sine));
+                                matrices.multiply(Vec3f.POSITIVE_X.getDegreesQuaternion(6.0f * sine));
                                 matrices.translate(0.0f, 0.0f, -0.04f * sine);
                                 break;
                         case HORIZON:
                                 matrices.translate(0.0f, 0.03f * sine, -0.06f * sine);
-                                matrices.multiply(Vector3f.POSITIVE_Z.getDegreesQuaternion(-18.0f * sine));
+                                matrices.multiply(Vec3f.POSITIVE_Z.getDegreesQuaternion(-18.0f * sine));
                                 break;
                         default:
                                 break;
