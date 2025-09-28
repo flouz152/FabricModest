@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "id": "fabricmodest",
+  "version": "1.0.0",
+  "name": "Fabric Modest",
+  "description": "A custom celestial-style interface with an advanced trigger bot.",
+  "authors": ["FabricModest"],
+  "license": "MIT",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "com.fabricmodest.client.ModestClient"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.14.0",
+    "fabric": "*",
+    "minecraft": "1.16.5",
+    "java": ">=8"
+  }
+}
