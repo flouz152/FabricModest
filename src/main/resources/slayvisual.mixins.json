@@ -2,9 +2,10 @@
 	"required": true,
 	"package": "com.slayvisual.mixin",
 	"compatibilityLevel": "JAVA_8",
-	"mixins": [
-		"ExampleMixin"
-	],
+        "mixins": [
+                "ExampleMixin",
+                "HeldItemRendererMixin"
+        ],
 	"injectors": {
 		"defaultRequire": 1
 	},
