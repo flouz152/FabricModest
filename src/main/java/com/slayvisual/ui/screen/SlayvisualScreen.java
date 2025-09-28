@@ -5,7 +5,7 @@ import com.slayvisual.TriggerBot;
 import com.slayvisual.config.SlayvisualConfig;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.AbstractButtonWidget;
+import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.SliderWidget;
 import net.minecraft.client.util.math.MatrixStack;
@@ -26,7 +26,7 @@ public class SlayvisualScreen extends Screen {
         private static final int PANEL_HEIGHT = 220;
 
         private Category category = Category.VISUALS;
-        private final List<AbstractButtonWidget> dynamicWidgets = new ArrayList<>();
+        private final List<ClickableWidget> dynamicWidgets = new ArrayList<>();
         private boolean capturingTriggerKey;
 
         public SlayvisualScreen() {
@@ -59,7 +59,7 @@ public class SlayvisualScreen extends Screen {
         @Override
         public void tick() {
                 super.tick();
-                for (AbstractButtonWidget widget : this.dynamicWidgets) {
+                for (ClickableWidget widget : this.dynamicWidgets) {
                         if (widget instanceof AnimatedWidgetHolder) {
                                 ((AnimatedWidgetHolder) widget).tickAnimation();
                         }
@@ -67,7 +67,7 @@ public class SlayvisualScreen extends Screen {
         }
 
         private void rebuildCategory(int left, int contentTop) {
-                for (AbstractButtonWidget widget : this.dynamicWidgets) {
+                for (ClickableWidget widget : this.dynamicWidgets) {
                         this.children.remove(widget);
                         this.buttons.remove(widget);
                         this.selectables.remove(widget);
@@ -160,7 +160,7 @@ public class SlayvisualScreen extends Screen {
                 });
         }
 
-        private void addDynamic(AbstractButtonWidget widget) {
+        private void addDynamic(ClickableWidget widget) {
                 this.dynamicWidgets.add(widget);
                 this.addButton(widget);
         }
