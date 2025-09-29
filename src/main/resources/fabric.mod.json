@@ -1,19 +1,19 @@
 {
-	"schemaVersion": 1,
-	"id": "slayvisual",
-	"version": "${version}",
-	"name": "slayvisual",
-	"description": "This is an example description! Tell everyone what your mod is about!",
-	"authors": [
-		"Me!"
-	],
-	"contact": {
-		"homepage": "https://fabricmc.net/",
-		"sources": "https://github.com/FabricMC/fabric-example-mod"
-	},
-	"license": "CC0-1.0",
-	"icon": "assets/slayvisual/icon.png",
-	"environment": "*",
+        "schemaVersion": 1,
+        "id": "slayvisual",
+        "version": "${version}",
+        "name": "slayvisual",
+        "description": "Standalone KillAura module with snap-style rotations.",
+        "authors": [
+                "Me!"
+        ],
+        "contact": {
+                "homepage": "https://fabricmc.net/",
+                "sources": "https://github.com/FabricMC/fabric-example-mod"
+        },
+        "license": "CC0-1.0",
+        "icon": "assets/slayvisual/icon.png",
+        "environment": "*",
         "entrypoints": {
                 "main": [
                         "com.slayvisual.Slayvisual"
@@ -22,16 +22,13 @@
                         "com.slayvisual.SlayvisualClient"
                 ]
         },
-	"mixins": [
-		"slayvisual.mixins.json"
-	],
-	"depends": {
-		"fabricloader": ">=0.17.2",
-		"minecraft": "~1.16.5",
-		"java": ">=8",
-		"fabric": "*"
-	},
-	"suggests": {
-		"another-mod": "*"
-	}
+        "depends": {
+                "fabricloader": ">=0.17.2",
+                "minecraft": "~1.16.5",
+                "java": ">=8",
+                "fabric": "*"
+        },
+        "suggests": {
+                "another-mod": "*"
+        }
 }
