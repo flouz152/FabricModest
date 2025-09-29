@@ -5,7 +5,7 @@ import com.slayvisual.TriggerBot;
 import com.slayvisual.config.SlayvisualConfig;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.AbstractButtonWidget;
+import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.SliderWidget;
 import net.minecraft.client.util.math.MatrixStack;
@@ -23,11 +23,12 @@ import java.util.function.Supplier;
 
 public class SlayvisualScreen extends Screen {
         private static final int PANEL_WIDTH = 320;
-        private static final int PANEL_HEIGHT = 220;
+        private static final int PANEL_HEIGHT = 340;
 
         private Category category = Category.VISUALS;
-        private final List<AbstractButtonWidget> dynamicWidgets = new ArrayList<>();
+        private final List<ClickableWidget> dynamicWidgets = new ArrayList<>();
         private boolean capturingTriggerKey;
+        private boolean capturingKillAuraKey;
 
         public SlayvisualScreen() {
                 super(new LiteralText("Celestial"));
@@ -43,7 +44,6 @@ public class SlayvisualScreen extends Screen {
 
                 this.children.clear();
                 this.buttons.clear();
-                this.selectables.clear();
                 this.addButton(new TabButton(left + 14, top + 16, Category.VISUALS));
                 this.addButton(new TabButton(left + 114, top + 16, Category.COMBAT));
 
@@ -53,13 +53,14 @@ public class SlayvisualScreen extends Screen {
         @Override
         public void removed() {
                 this.capturingTriggerKey = false;
+                this.capturingKillAuraKey = false;
                 super.removed();
         }
 
         @Override
         public void tick() {
                 super.tick();
-                for (AbstractButtonWidget widget : this.dynamicWidgets) {
+                for (ClickableWidget widget : this.dynamicWidgets) {
                         if (widget instanceof AnimatedWidgetHolder) {
                                 ((AnimatedWidgetHolder) widget).tickAnimation();
                         }
@@ -67,10 +68,9 @@ public class SlayvisualScreen extends Screen {
         }
 
         private void rebuildCategory(int left, int contentTop) {
-                for (AbstractButtonWidget widget : this.dynamicWidgets) {
+                for (ClickableWidget widget : this.dynamicWidgets) {
                         this.children.remove(widget);
                         this.buttons.remove(widget);
-                        this.selectables.remove(widget);
                 }
                 this.dynamicWidgets.clear();
 
@@ -126,6 +126,70 @@ public class SlayvisualScreen extends Screen {
 
         private void buildCombat(int left, int top) {
                 int y = top;
+
+                addDynamic(new ToggleButton(left + 20, y, 280, "Kill Aura", SlayvisualConfig.COMBAT::isKillAuraEnabled, SlayvisualConfig.COMBAT::setKillAuraEnabled));
+                y += 30;
+
+                addDynamic(new EnumCycleButton<>(left + 20, y, 280, "Rotation Mode",
+                                SlayvisualConfig.KillAuraRotationMode.values(),
+                                SlayvisualConfig.COMBAT::getKillAuraRotationMode,
+                                SlayvisualConfig.COMBAT::setKillAuraRotationMode,
+                                SlayvisualConfig.KillAuraRotationMode::getDisplayName));
+                y += 28;
+
+                addDynamic(new ValueSlider(left + 20, y, 280, "Aura Range", 2.5f, 6.0f,
+                                SlayvisualConfig.COMBAT::getKillAuraRange,
+                                SlayvisualConfig.COMBAT::setKillAuraRange));
+                y += 24;
+
+                addDynamic(new ValueSlider(left + 20, y, 280, "Aura FOV", 30.0f, 180.0f,
+                                () -> SlayvisualConfig.COMBAT.getKillAuraFov(),
+                                SlayvisualConfig.COMBAT::setKillAuraFov));
+                y += 24;
+
+                addDynamic(new ValueSlider(left + 20, y, 280, "Rotation Speed", 5.0f, 180.0f,
+                                SlayvisualConfig.COMBAT::getKillAuraRotationSpeed,
+                                SlayvisualConfig.COMBAT::setKillAuraRotationSpeed));
+                y += 24;
+
+                addDynamic(new ValueSlider(left + 20, y, 280, "Aura Cooldown", 0.4f, 1.0f,
+                                SlayvisualConfig.COMBAT::getKillAuraCooldownThreshold,
+                                SlayvisualConfig.COMBAT::setKillAuraCooldownThreshold));
+                y += 28;
+
+                addDynamic(new ValueSlider(left + 20, y, 280, "Aura Interval", 40f, 400f,
+                                () -> (float) SlayvisualConfig.COMBAT.getKillAuraAttackIntervalMs(),
+                                value -> SlayvisualConfig.COMBAT.setKillAuraAttackIntervalMs((long) Math.round(value))));
+                y += 28;
+
+                addDynamic(new ValueSlider(left + 20, y, 280, "Switch Delay", 0f, 600f,
+                                () -> (float) SlayvisualConfig.COMBAT.getKillAuraSwitchDelayMs(),
+                                value -> SlayvisualConfig.COMBAT.setKillAuraSwitchDelayMs((long) Math.round(value))));
+                y += 30;
+
+                addDynamic(new AnimatedWidget(left + 20, y, 280, 20, new LiteralText("Bind Kill Aura")) {
+                        @Override
+                        protected void handlePress() {
+                                capturingKillAuraKey = true;
+                                capturingTriggerKey = false;
+                        }
+
+                        @Override
+                        protected void renderContent(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+                                String current = capturingKillAuraKey ? "Press a key..." : keyName();
+                                drawCenteredText(matrices, textRenderer, current, this.x + this.width / 2, this.y + 6, 0xFFFFFF);
+                        }
+
+                        private String keyName() {
+                                String name = GLFW.glfwGetKeyName(SlayvisualConfig.COMBAT.getKillAuraKeyCode(), 0);
+                                if (name == null) {
+                                        return "Key: " + SlayvisualConfig.COMBAT.getKillAuraKeyCode();
+                                }
+                                return "Current: " + name.toUpperCase(Locale.ROOT);
+                        }
+                });
+                y += 30;
+
                 addDynamic(new ToggleButton(left + 20, y, 280, "Trigger Bot", SlayvisualConfig.COMBAT::isTriggerBotEnabled, SlayvisualConfig.COMBAT::setTriggerBotEnabled));
                 y += 30;
 
@@ -142,6 +206,7 @@ public class SlayvisualScreen extends Screen {
                         @Override
                         protected void handlePress() {
                                 capturingTriggerKey = true;
+                                capturingKillAuraKey = false;
                         }
 
                         @Override
@@ -160,13 +225,21 @@ public class SlayvisualScreen extends Screen {
                 });
         }
 
-        private void addDynamic(AbstractButtonWidget widget) {
+        private void addDynamic(ClickableWidget widget) {
                 this.dynamicWidgets.add(widget);
                 this.addButton(widget);
         }
 
         @Override
         public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+                if (capturingKillAuraKey) {
+                        capturingKillAuraKey = false;
+                        if (keyCode != GLFW.GLFW_KEY_ESCAPE) {
+                                SlayvisualConfig.COMBAT.setKillAuraKeyCode(keyCode);
+                        }
+                        return true;
+                }
+
                 if (capturingTriggerKey) {
                         capturingTriggerKey = false;
                         if (keyCode != GLFW.GLFW_KEY_ESCAPE) {

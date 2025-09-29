@@ -1,5 +1,6 @@
 package com.slayvisual.config;
 
+import com.slayvisual.KillAura;
 import com.slayvisual.TriggerBot;
 import com.slayvisual.ui.SlayvisualNotifications;
 import org.lwjgl.glfw.GLFW;
@@ -101,6 +102,16 @@ public final class SlayvisualConfig {
                 private float attackCooldownThreshold = 0.92f;
                 private long minimumAttackIntervalMs = 85L;
 
+                private boolean killAuraEnabled = false;
+                private int killAuraKeyCode = GLFW.GLFW_KEY_R;
+                private float killAuraRange = 3.0f;
+                private float killAuraFov = 120.0f;
+                private float killAuraRotationSpeed = 55.0f;
+                private float killAuraCooldownThreshold = 0.88f;
+                private long killAuraAttackIntervalMs = 110L;
+                private long killAuraSwitchDelayMs = 350L;
+                private KillAuraRotationMode killAuraRotationMode = KillAuraRotationMode.SNAP;
+
                 public boolean isTriggerBotEnabled() {
                         return triggerBotEnabled;
                 }
@@ -139,6 +150,97 @@ public final class SlayvisualConfig {
 
                 public void setMinimumAttackIntervalMs(long minimumAttackIntervalMs) {
                         this.minimumAttackIntervalMs = minimumAttackIntervalMs;
+                }
+
+                public boolean isKillAuraEnabled() {
+                        return killAuraEnabled;
+                }
+
+                public void setKillAuraEnabled(boolean killAuraEnabled) {
+                        this.killAuraEnabled = killAuraEnabled;
+                        SlayvisualNotifications.notifyToggle("Kill Aura", killAuraEnabled);
+                        KillAura.setEnabled(killAuraEnabled);
+                }
+
+                public int getKillAuraKeyCode() {
+                        return killAuraKeyCode;
+                }
+
+                public void setKillAuraKeyCode(int killAuraKeyCode) {
+                        this.killAuraKeyCode = killAuraKeyCode;
+                        String keyName = GLFW.glfwGetKeyName(killAuraKeyCode, 0);
+                        if (keyName == null) {
+                                keyName = "key " + killAuraKeyCode;
+                        }
+                        SlayvisualNotifications.notify("Kill Aura key bound to " + keyName.toUpperCase());
+                        KillAura.setToggleKey(killAuraKeyCode);
+                }
+
+                public float getKillAuraRange() {
+                        return killAuraRange;
+                }
+
+                public void setKillAuraRange(float killAuraRange) {
+                        this.killAuraRange = clamp(killAuraRange, 0.5f, 3.0f);
+                }
+
+                public float getKillAuraFov() {
+                        return killAuraFov;
+                }
+
+                public void setKillAuraFov(float killAuraFov) {
+                        this.killAuraFov = clamp(killAuraFov, 30.0f, 180.0f);
+                }
+
+                public float getKillAuraRotationSpeed() {
+                        return killAuraRotationSpeed;
+                }
+
+                public void setKillAuraRotationSpeed(float killAuraRotationSpeed) {
+                        this.killAuraRotationSpeed = clamp(killAuraRotationSpeed, 5.0f, 180.0f);
+                }
+
+                public float getKillAuraCooldownThreshold() {
+                        return killAuraCooldownThreshold;
+                }
+
+                public void setKillAuraCooldownThreshold(float killAuraCooldownThreshold) {
+                        this.killAuraCooldownThreshold = clamp(killAuraCooldownThreshold, 0.4f, 1.0f);
+                }
+
+                public long getKillAuraAttackIntervalMs() {
+                        return killAuraAttackIntervalMs;
+                }
+
+                public void setKillAuraAttackIntervalMs(long killAuraAttackIntervalMs) {
+                        this.killAuraAttackIntervalMs = Math.max(40L, Math.min(400L, killAuraAttackIntervalMs));
+                }
+
+                public long getKillAuraSwitchDelayMs() {
+                        return killAuraSwitchDelayMs;
+                }
+
+                public void setKillAuraSwitchDelayMs(long killAuraSwitchDelayMs) {
+                        this.killAuraSwitchDelayMs = Math.max(0L, Math.min(600L, killAuraSwitchDelayMs));
+                }
+
+                public KillAuraRotationMode getKillAuraRotationMode() {
+                        return killAuraRotationMode;
+                }
+
+                public void setKillAuraRotationMode(KillAuraRotationMode killAuraRotationMode) {
+                        this.killAuraRotationMode = killAuraRotationMode;
+                        SlayvisualNotifications.notify("Kill Aura rotation: " + killAuraRotationMode.getDisplayName());
+                }
+
+                private float clamp(float value, float min, float max) {
+                        if (value < min) {
+                                return min;
+                        }
+                        if (value > max) {
+                                return max;
+                        }
+                        return value;
                 }
         }
 
@@ -205,6 +307,21 @@ public final class SlayvisualConfig {
 
                 private int clamp(int value) {
                         return Math.max(0, Math.min(255, value));
+                }
+        }
+
+        public enum KillAuraRotationMode {
+                SNAP("Snap"),
+                SMOOTH("Smooth");
+
+                private final String displayName;
+
+                KillAuraRotationMode(String displayName) {
+                        this.displayName = displayName;
+                }
+
+                public String getDisplayName() {
+                        return displayName;
                 }
         }
 

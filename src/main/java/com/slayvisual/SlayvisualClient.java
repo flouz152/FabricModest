@@ -22,6 +22,7 @@ public class SlayvisualClient implements ClientModInitializer {
                 TargetVisuals.init();
 
                 TriggerBot.init();
+                KillAura.init();
 
                 openGuiKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
                                 "key.slayvisual.gui",
@@ -38,6 +39,9 @@ public class SlayvisualClient implements ClientModInitializer {
 
                 TriggerBot.setToggleKey(SlayvisualConfig.COMBAT.getTriggerBotKeyCode());
                 TriggerBot.setEnabled(SlayvisualConfig.COMBAT.isTriggerBotEnabled());
+
+                KillAura.setToggleKey(SlayvisualConfig.COMBAT.getKillAuraKeyCode());
+                KillAura.setEnabled(SlayvisualConfig.COMBAT.isKillAuraEnabled());
         }
 
         private void openConfigScreen(MinecraftClient client) {
